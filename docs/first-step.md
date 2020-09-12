@@ -31,20 +31,6 @@ _推測するな計測せよ_
 
 ### サーバ上で以下を実行
 
-#### mysqldump
-
-シュッととって開発環境に入れてコミットする
-
-`/home/isucon` で実行する
-
-```sh
-# 指定データベースのテーブルとデータを取得
-$ mysqldump -uroot -h localhost #{database name} -n > dump.sql
-
-# ローカルにコピー
-$ scp -rpC isucon:/home/isucon/dump.sql initdb.d/
-```
-
 #### マシンスペックのチェック
 
 - `$ lscpu`
@@ -69,19 +55,29 @@ $ scp -rpC isucon:/home/isucon/dump.sql initdb.d/
 
 #### サービス名の確認
 
-- `<APP-NAME>` を変更する
-  - [restart_app.sh](../scripts/restart_app.sh)
-  - [deploy.sh](../scripts/deploy_app.sh)
-
 ## Git で管理
 
 1. ソースをローカルに持ってくる
+
    ```sh
-   $ scp -rpC isucon:/home/isucon/webapp/ruby webapp/
+   # Get App
+   $ scp -rpC isucon:/home/isucon/webapp/go webapp/
    $ scp -rpC isucon:/home/isucon/webapp/static webapp/
    ```
-1. `/etc` 以下も git で管理する
-   - init, add, first commit までやっておく
+
+### mysqldump
+
+`/home/isucon` で実行する
+
+```sh
+# 指定データベースのテーブルとデータを取得
+$ mysqldump -uroot -h localhost #{database name} -n > dump.sql
+
+# ローカルにコピー
+$ scp -rpC isucon:/home/isucon/dump.sql initdb.d/
+```
+
+落としたらコードと一緒に眺めるとよい
 
 ## 初回のベンチを実行する
 
@@ -91,31 +87,39 @@ $ scp -rpC isucon:/home/isucon/dump.sql initdb.d/
 
 調査に必須のツールをまとめてインストールする
 
+### local
+
+alp, percona-toolkit を使う
+
 ```sh
-$ sudo apt-get update -y && sudo apt-get install -y htop unzip percona-toolkit
+$ brew install alp percona-toolkit
 ```
 
-## Ruby に切り替えてベンチマーク
+### VM
+
+- netdata
+  - `$ bash <(curl -Ss https://my-netdata.io/kickstart.sh)`
+  - netdata の画面は常に表示しておくと良い
+  - port: 19999
+- htop もあるといいかも
+
+## Go に切り替えてベンチマーク
 
 ### 準備
 
-- `$ bash <(curl -Ss https://my-netdata.io/kickstart.sh)`
-  - netdata の画面は常に表示しておくと良い
-  - port: 19999
-- systemctl 使って Ruby 切り替え
-
-### 実行
-
-- `$ htop`
-  - プロセスチェック
+- systemctl 使って Go に切り替え
 - `$ journalctl -f` してからベンチを実行する
   - 問題が起きないか確認する
 
 ## ボトルネックを見つける
 
+`make get` で nginx, slow-query のログを取得できる。それぞれ設定を済ませておく。  
+基本的に index 貼るのが最初の仕事。
+
 ### alp
 
 nginx のログからどのエンドポイントがボトルネックかを測定する
+ltsv format の設定と access log で ltsv を使うように変更
 
 1. nginx のログの設定を行う
 1. `make alp`
@@ -123,13 +127,22 @@ nginx のログからどのエンドポイントがボトルネックかを測�
 ### Percona Toolkit
 
 slow query の解析を行う
+
+mysql conf はここらへんにある
+
+- /etc/my.cnf
+- /etc/mysql/my.cnf
+- /etc/mysql/mysql.conf.d/mysqld.cnf`
+
+sloq query の書き出しは以下
+
+```conf:/etc/mysql/mysql.conf.d/mysqld.cnf
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/mysql-slow.log
+long_query_time = 1
+```
+
 ツールの実行は 3 分くらいかかる
 
-1. `$ sudo pt-query-digest --limit 10 /var/log/mysql/slow.log`
+1. `make get`
 1. 結果を gist に貼って共有する
-
-## チューニング
-
-_一改善につき一ベンチ_
-
-ここまでの調査を経て、ボトルネックの調整を行う。一時間以内に着手できれば良さそう。
