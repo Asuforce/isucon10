@@ -4,12 +4,14 @@ get_n:
 	ssh -A isucon1 sudo systemctl restart nginx
 
 alp:
-	cat log/access.log | alp ltsv
+	cat log/access.log | alp ltsv --sort=max
 
 get_sq:
 	ssh -A isucon3 sudo cp /var/log/mysql/mysql-slow.log /home/isucon/mysql-slow.log
 	ssh -A isucon3 sudo chown isucon:isucon /home/isucon/mysql-slow.log
 	scp -rpC isucon3:/home/isucon/mysql-slow.log log
+	ssh -A isucon3 sudo rm /var/log/mysql/mysql-slow.log
+	ssh -A isucon3 sudo systemctl restart mysql
 
 sq:
 	pt-query-digest --limit 10 log/mysql-slow.log
