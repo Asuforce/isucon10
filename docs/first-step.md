@@ -118,9 +118,7 @@ $ sudo apt-get update -y && sudo apt-get install -y htop unzip percona-toolkit
 nginx のログからどのエンドポイントがボトルネックかを測定する
 
 1. nginx のログの設定を行う
-1. `$ wget -qO tmp.zip https://github.com/tkuchiki/alp/releases/download/v0.3.1/alp_linux_amd64.zip && sudo unzip -d /usr/local/bin tmp.zip && rm tmp.zip`
-1. `$ sudo alp --sum -r -f /var/log/nginx/access.log --aggregates='/keyword/.*'`
-1. 結果を gist に貼って共有する
+1. `make alp`
 
 ### Percona Toolkit
 

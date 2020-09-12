@@ -1,3 +1,18 @@
+get_n:
+	scp -rpC isucon1:/var/log/nginx/isuumo_access_log.tsv log/access.log
+	ssh -A isucon1 sudo rm /var/log/nginx/isuumo_access_log.tsv
+
+alp:
+	cat log/access.log | alp ltsv
+
+get_sq:
+	ssh -A isucon3 sudo cp /var/log/mysql/mysql-slow.log /home/isucon/mysql-slow.log
+	ssh -A isucon3 sudo chown isucon:isucon /home/isucon/mysql-slow.log
+	scp -rpC isucon3:/home/isucon/mysql-slow.log log
+
+sq:
+	pt-query-digest --limit 10 log/mysql-slow.log
+
 deploy:
 	./scripts/deploy.sh
 	@make restart
