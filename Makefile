@@ -4,7 +4,7 @@ get_n:
 	ssh -A isucon1 sudo systemctl restart nginx
 
 alp:
-	cat log/access.log | alp ltsv --sort=max
+	cat log/access.log | alp ltsv --sort=sum
 
 get_sq:
 	ssh -A isucon3 sudo cp /var/log/mysql/mysql-slow.log /home/isucon/mysql-slow.log
