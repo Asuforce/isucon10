@@ -38,6 +38,10 @@ innodb_flush_log_at_trx_commit = 2
 application によっては初期化処理が走って alter table の結果が初期化されてしまう。  
 初期化スクリプトに query を追加すれば解決する。
 
+- 参考になる
+  - [MySQL でクエリチューニングことはじめ](http://tech.aainc.co.jp/archives/4634)
+  - [MySQL の Index をはるコツ](https://qiita.com/katsukii/items/3409e3c3c96580d37c2b)
+
 ```sh
 EXPLAIN <query>
 
@@ -65,6 +69,19 @@ INSERT INTO table_name (col_1, col_2, col_3) VALUES (1, 2, 3);
 
 # After
 INSERT INTO table_name (col_1, col_2, col_3) VALUES (1, 2, 3), (4, 5, 6), (7, 8, 9);
+```
+
+## kernel
+
+```sh
+$ sysctl net.core.somaxconn
+
+$ sysctl -w net.core.somaxconn=1024
+
+# /etc/sysctl.conf に追加して永続化
+net.core.somaxconn = 1024
+
+$ sysctl -p
 ```
 
 ## cache
