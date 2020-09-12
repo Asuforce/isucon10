@@ -1,6 +1,7 @@
 get_n:
 	scp -rpC isucon1:/var/log/nginx/isuumo_access_log.tsv log/access.log
 	ssh -A isucon1 sudo rm /var/log/nginx/isuumo_access_log.tsv
+	ssh -A isucon1 sudo systemctl restart nginx
 
 alp:
 	cat log/access.log | alp ltsv
